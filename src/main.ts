@@ -4,14 +4,9 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 
-// import { json, urlencoded } from 'express';
-
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Some Configuration for API (Not about Swagger)
-  // app.use(json({ limit: '50mb' }));
-  // app.use(urlencoded({ extended: true, limit: '50mb' }));
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -25,7 +20,6 @@ async function bootstrap() {
   app.setGlobalPrefix(apiPath);
 
   const options = new DocumentBuilder()
-    .addBearerAuth()
     .setTitle('WS Public Swagger API')
     .setDescription('WS Public Swagger API')
     .setVersion('1.0')

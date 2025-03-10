@@ -32,6 +32,9 @@ importers:
       class-validator:
         specifier: ^0.14.1
         version: 0.14.1
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.4.7
       mssql:
         specifier: ^11.0.1
         version: 11.0.1
