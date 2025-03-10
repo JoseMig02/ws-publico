@@ -25,5 +25,6 @@ import { LogsModule } from './logs/logs.module';
   exports: [TypeOrmModule], 
   controllers: [AppController],
   providers: [AppService],
+  
 })
 export class AppModule {}

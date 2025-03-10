@@ -1,26 +1,66 @@
-import { Injectable } from '@nestjs/common';
+// src/financial-health/financial-health.service.ts
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { FinancialHealth } from './entities/financial-health.entity';
 import { CreateFinancialHealthDto } from './dto/create-financial-health.dto';
-import { UpdateFinancialHealthDto } from './dto/update-financial-health.dto';
+import { FinancialHealthResponseDto } from './dto/financial-health-response.dto';
+import { Client } from 'src/clients/entities/client.entity';
 
 @Injectable()
 export class FinancialHealthService {
-  create(createFinancialHealthDto: CreateFinancialHealthDto) {
-    return 'This action adds a new financialHealth';
+  constructor(
+    @InjectRepository(FinancialHealth)
+    private financialHealthRepository: Repository<FinancialHealth>,
+    @InjectRepository(Client)
+    private clientRepository: Repository<Client>,
+  ) {}
+
+  async createFinancialHealth(dto: CreateFinancialHealthDto): Promise<FinancialHealthResponseDto> {
+    const client = await this.clientRepository.findOne({ where: { numberId: dto.numberId } });
+    if (!client) {
+      throw new NotFoundException(`Cliente con cédula/RNC ${dto.numberId} no encontrado.`);
+    }
+    const existing = await this.financialHealthRepository.findOne({ where: { client } });
+    if (existing) {
+      throw new BadRequestException(`Ya existe una evaluación de salud financiera para el cliente con cédula/RNC ${dto.numberId}.`);
+    }
+
+    const newRecord = this.financialHealthRepository.create({
+      client,
+      indicator: dto.indicator,
+      comment: dto.comment,
+      totalAmountDue: dto.totalAmountDue,
+    });
+
+    const saved = await this.financialHealthRepository.save(newRecord);
+
+    return {
+      id: saved.id,
+      numberId: client.numberId,
+      indicator: saved.indicator,
+      comment: saved.comment,
+      totalAmountDue: saved.totalAmountDue,
+    };
   }
 
-  findAll() {
-    return `This action returns all financialHealth`;
-  }
+  async getFinancialHealthByClientNumberId(numberId: string): Promise<FinancialHealthResponseDto> {
+    const client = await this.clientRepository.findOne({ where: { numberId
+      : numberId } });
+    if (!client) {
+      throw new NotFoundException(`Cliente con cédula/RNC ${numberId} no encontrado.`);
+    }
+    const financialHealth = await this.financialHealthRepository.findOne({ where: { client } });
+    if (!financialHealth) {
+      throw new NotFoundException(`No se encontró salud financiera para el cliente con cédula/RNC ${numberId}.`);
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} financialHealth`;
-  }
-
-  update(id: number, updateFinancialHealthDto: UpdateFinancialHealthDto) {
-    return `This action updates a #${id} financialHealth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} financialHealth`;
+    return {
+      id: financialHealth.id,
+      numberId: client.numberId,
+      indicator: financialHealth.indicator,
+      comment: financialHealth.comment,
+      totalAmountDue: financialHealth.totalAmountDue,
+    };
   }
 }

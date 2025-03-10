@@ -1,34 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+// src/credit-history/credit-history.controller.ts
+import { Controller, Post, Get, Body, Param } from '@nestjs/common';
+import { ApiTags} from '@nestjs/swagger';
 import { CreditHistoryService } from './credit-history.service';
 import { CreateCreditHistoryDto } from './dto/create-credit-history.dto';
-import { UpdateCreditHistoryDto } from './dto/update-credit-history.dto';
+import { CreditHistoryResponseDto } from './dto/credit-history-response.dto';
 
+@ApiTags('Credit History')
 @Controller('credit-history')
 export class CreditHistoryController {
   constructor(private readonly creditHistoryService: CreditHistoryService) {}
 
   @Post()
-  create(@Body() createCreditHistoryDto: CreateCreditHistoryDto) {
-    return this.creditHistoryService.create(createCreditHistoryDto);
+  async createCreditHistory(@Body() dto: CreateCreditHistoryDto): Promise<CreditHistoryResponseDto> {
+    return await this.creditHistoryService.createCreditHistory(dto);
   }
 
-  @Get()
-  findAll() {
-    return this.creditHistoryService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.creditHistoryService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCreditHistoryDto: UpdateCreditHistoryDto) {
-    return this.creditHistoryService.update(+id, updateCreditHistoryDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.creditHistoryService.remove(+id);
+  @Get(':numberId')
+  async getCreditHistoryByClientCedula(@Param('numberId') numberId: string): Promise<CreditHistoryResponseDto[]> {
+    return await this.creditHistoryService.getCreditHistoryByClientNumberId(numberId);
   }
 }

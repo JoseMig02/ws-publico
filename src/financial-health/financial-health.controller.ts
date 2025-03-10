@@ -1,34 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+// src/financial-health/financial-health.controller.ts
+import { Controller, Post, Body, Get, Param } from '@nestjs/common';
 import { FinancialHealthService } from './financial-health.service';
 import { CreateFinancialHealthDto } from './dto/create-financial-health.dto';
-import { UpdateFinancialHealthDto } from './dto/update-financial-health.dto';
+import { FinancialHealthResponseDto } from './dto/financial-health-response.dto';
 
 @Controller('financial-health')
 export class FinancialHealthController {
-  constructor(private readonly financialHealthService: FinancialHealthService) {}
+  constructor(private readonly financialHealthService: FinancialHealthService) { }
 
   @Post()
-  create(@Body() createFinancialHealthDto: CreateFinancialHealthDto) {
-    return this.financialHealthService.create(createFinancialHealthDto);
+  async createFinancialHealth(@Body() dto: CreateFinancialHealthDto): Promise<FinancialHealthResponseDto> {
+    return await this.financialHealthService.createFinancialHealth(dto);
   }
-
-  @Get()
-  findAll() {
-    return this.financialHealthService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.financialHealthService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFinancialHealthDto: UpdateFinancialHealthDto) {
-    return this.financialHealthService.update(+id, updateFinancialHealthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.financialHealthService.remove(+id);
+  @Get(':numberId')
+  async getFinancialHealthByClientNumberId(@Param('numberId') numberId: string): Promise<FinancialHealthResponseDto> {
+    return await this.financialHealthService.getFinancialHealthByClientNumberId(numberId);
   }
 }
