@@ -1,34 +1,40 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ClientsService } from './clients.service';
+// src/client/client.controller.ts
+import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe } from '@nestjs/common';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
+import { Client } from './entities/client.entity';
+import { ClientService } from './clients.service';
 
 @Controller('clients')
-export class ClientsController {
-  constructor(private readonly clientsService: ClientsService) {}
+export class ClientController {
+  constructor(private readonly clientService: ClientService) {}
 
   @Post()
-  create(@Body() createClientDto: CreateClientDto) {
-    return this.clientsService.create(createClientDto);
+  async createClient(@Body() dto: CreateClientDto): Promise<Client> {
+    return await this.clientService.createClient(dto);
   }
 
   @Get()
-  findAll() {
-    return this.clientsService.findAll();
+  async getAllClients(): Promise<Client[]> {
+    return await this.clientService.getAllClients();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.clientsService.findOne(+id);
+  async getClientById(@Param('id', ParseIntPipe) id: number): Promise<Client> {
+    return await this.clientService.getClientById(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateClientDto: UpdateClientDto) {
-    return this.clientsService.update(+id, updateClientDto);
+  @Put(':id')
+  async updateClient(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateClientDto,
+  ): Promise<Client> {
+    return await this.clientService.updateClient(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.clientsService.remove(+id);
+  async deleteClient(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
+    await this.clientService.deleteClient(id);
+    return { message: 'Cliente eliminado exitosamente.' };
   }
 }
