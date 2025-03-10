@@ -4,8 +4,8 @@ import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 export class InflationRate {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column({ type: 'varchar', length: 6 })
+  
+  @Column({ type: 'varchar', length: 7 })
   period: string;
 
   @Column('decimal', { precision: 5, scale: 2 })

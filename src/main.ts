@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { ValidationPipe } from '@nestjs/common';
+
 // import { json, urlencoded } from 'express';
 
 async function bootstrap() {
@@ -10,6 +12,14 @@ async function bootstrap() {
   // Some Configuration for API (Not about Swagger)
   // app.use(json({ limit: '50mb' }));
   // app.use(urlencoded({ extended: true, limit: '50mb' }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      disableErrorMessages: false, 
+    }),
+  );
 
   const apiPath = 'api';
   app.setGlobalPrefix(apiPath);
@@ -24,6 +34,6 @@ async function bootstrap() {
   // Swagger path: http://localhost:3200/api/docs
   SwaggerModule.setup(`${apiPath}/docs`, app, document);
 
-  await app.listen(3000);
+  await app.listen(Number(process.env.PORT) || 3200);
 }
 bootstrap();
