@@ -6,9 +6,9 @@ import { CreditHistory } from './entities/credit-history.entity';
 import { Client } from 'src/clients/entities/client.entity';
 
 @Module({
-  imports:[        TypeOrmModule.forFeature([CreditHistory,Client]),
+  imports: [TypeOrmModule.forFeature([CreditHistory, Client]),
   ],
   controllers: [CreditHistoryController],
-  providers: [CreditHistoryService],
+  providers: [CreditHistoryService,],
 })
-export class CreditHistoryModule {}
+export class CreditHistoryModule { }

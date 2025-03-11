@@ -6,6 +6,7 @@ import { FinancialHealth } from './entities/financial-health.entity';
 import { CreateFinancialHealthDto } from './dto/create-financial-health.dto';
 import { FinancialHealthResponseDto } from './dto/financial-health-response.dto';
 import { Client } from 'src/clients/entities/client.entity';
+import { IsCedulaValidConstraint } from 'src/common/validators/cedula.validator';
 
 @Injectable()
 export class FinancialHealthService {
@@ -14,7 +15,7 @@ export class FinancialHealthService {
     private financialHealthRepository: Repository<FinancialHealth>,
     @InjectRepository(Client)
     private clientRepository: Repository<Client>,
-  ) {}
+  ) { }
 
   async createFinancialHealth(dto: CreateFinancialHealthDto): Promise<FinancialHealthResponseDto> {
     const client = await this.clientRepository.findOne({ where: { numberId: dto.numberId } });
@@ -45,8 +46,16 @@ export class FinancialHealthService {
   }
 
   async getFinancialHealthByClientNumberId(numberId: string): Promise<FinancialHealthResponseDto> {
-    const client = await this.clientRepository.findOne({ where: { numberId
-      : numberId } });
+    const cedulaValidator = new IsCedulaValidConstraint();
+    if (!cedulaValidator.validate(numberId)) {
+      throw new BadRequestException('La cédula o RNC no tiene un formato válido.');
+    }
+    const client = await this.clientRepository.findOne({
+      where: {
+        numberId
+          : numberId
+      }
+    });
     if (!client) {
       throw new NotFoundException(`Cliente con cédula/RNC ${numberId} no encontrado.`);
     }

@@ -1,12 +1,14 @@
 // src/client/dto/create-client.dto.ts
-import { IsNotEmpty, IsString, IsOptional, IsEmail, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsString, IsEmail, MaxLength, Validate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsCedulaValidConstraint } from 'src/common/validators/cedula.validator';
 
 export class CreateClientDto {
   @ApiProperty({
     description: 'Cédula del cliente (única)',
     example: '00123456789',
   })
+  @Validate(IsCedulaValidConstraint)
   @IsNotEmpty({ message: 'La cédula es requerida.' })
   @IsString({ message: 'La cédula debe ser una cadena de texto.' })
   @MaxLength(20, { message: 'La cédula no puede tener más de 20 caracteres.' })

@@ -1,5 +1,6 @@
-import { IsNotEmpty, IsString, IsNumber, Min, IsIn, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, Min, IsIn, MaxLength, Validate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsCedulaValidConstraint } from 'src/common/validators/cedula.validator';
 
 export class CreateFinancialHealthDto {
 
@@ -7,6 +8,7 @@ export class CreateFinancialHealthDto {
     example: '00123456789',
     description: 'Cédula o RNC del cliente en formato de cadena de texto.',
   })
+ @Validate(IsCedulaValidConstraint)
   @IsNotEmpty({ message: 'La cédula o RNC del cliente es requerida.' })
   @IsString({ message: 'La cédula o RNC debe ser una cadena de texto.' })
   numberId: string;
