@@ -17,10 +17,16 @@ export class ServiceLog{
     });
     await this.serviceLogRepository.save(log);
   }
-  async getLogs(): Promise<Log[]> {
-    return await this.serviceLogRepository.find({
-      order: { createdAt: 'DESC' },
-    });
+  async getLogs(from?: string, to?: string): Promise<Log[]> {
+    const queryBuilder = this.serviceLogRepository.createQueryBuilder('log');
+    
+    if (from && to) {
+      queryBuilder.where('log.createdAt BETWEEN :from AND :to', { from, to });
+    }
+
+    queryBuilder.orderBy('log.createdAt', 'DESC');
+    
+    return await queryBuilder.getMany();
   }
   
   async getStatistics(): Promise<any> {
