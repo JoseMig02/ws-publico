@@ -1,47 +1,67 @@
-// src/common/validators/cedula.validator.ts
-import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments, IsString } from 'class-validator';
+import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from 'class-validator';
 
 @ValidatorConstraint({ async: false })
 export class IsCedulaValidConstraint implements ValidatorConstraintInterface {
   
   validate(value: any): boolean {
-    return this.valida_cedula(value);
+    if (this.validaCedula(value)) {
+      return true;
+    }
+    if (this.validaRNC(value)) {
+      return true;
+    }
+    return false; 
   }
 
   defaultMessage(args: ValidationArguments): string {
-    return 'La cédula no es válida.';
+    return 'El número proporcionado no es una cédula ni un RNC válido.';
   }
 
-  valida_cedula(ced: string): boolean {  
-    const c: string = ced.replace(/-/g, '');  
-    const cedula: string = c.slice(0, c.length - 1);  
-    const verificador: string = c.slice(c.length - 1);  
-    let suma: number = 0;  
-    let cedulaValida: number = 0;
-    
-    if (ced.length < 11) { return false; }  
-    
-    for (let i: number = 0; i < cedula.length; i++) {  
-        let mod: number = (i % 2) === 0 ? 1 : 2;  
-        let res: number = parseInt(cedula.slice(i, i + 1)) * mod; 
-        
-        if (res > 9) {  
-            const uno: string = res.toString().slice(0, 1);  
-            const dos: string = res.toString().slice(1, 2); 
-            res = parseInt(uno) + parseInt(dos);  
-        } 
-        
-        suma += res;  
-    }  
-    
-    const el_numero: number = (10 - (suma % 10)) % 10;  
-    
-    if (el_numero === parseInt(verificador) && cedula.slice(0, 3) !== "000") {  
-        cedulaValida = 1;
-    } else {  
-        cedulaValida = 0;
-    }  
-    
-    return cedulaValida === 1;  
+  private validaCedula(pCedula: string): boolean {
+    let vnTotal = 0;
+    const vcCedula = pCedula.replace("-", "");
+    const pLongCed = vcCedula.trim().length;
+    const digitoMult = [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1];
+
+    if (pLongCed < 11 || pLongCed > 11) {
+        return false;
+    }
+
+    for (let vDig = 1; vDig <= pLongCed; vDig++) {
+        const vCalculo = parseInt(vcCedula.substring(vDig - 1, vDig)) * digitoMult[vDig - 1];
+        if (vCalculo < 10) {
+            vnTotal += vCalculo;
+        } else {
+            vnTotal += parseInt(vCalculo.toString().charAt(0)) + parseInt(vCalculo.toString().charAt(1));
+        }
+    }
+
+    return vnTotal % 10 === 0; 
+  }
+
+  private validaRNC(pRNC: string): boolean {
+    let vnTotal = 0;
+    const digitoMult: number[] = [7, 9, 8, 6, 5, 4, 3, 2];
+    const vcRNC = pRNC.replace(/-/g, "").replace(/ /g, "");
+    const vDigito = vcRNC.substring(8, 9);
+
+    if (vcRNC.length === 9) {
+        if (!["1", "4", "5"].includes(vcRNC.substring(0, 1))) {
+            return false;
+        }
+    }
+
+    for (let vDig = 1; vDig <= 8; vDig++) {
+        const vCalculo = parseInt(vcRNC.substring(vDig - 1, vDig)) * digitoMult[vDig - 1];
+        vnTotal += vCalculo;
+    }
+
+    if ((vnTotal % 11 === 0 && vDigito === "1") || 
+        (vnTotal % 11 === 1 && vDigito === "1") || 
+        (11 - (vnTotal % 11) === parseInt(vDigito))) {
+        return true;
+    } else {
+        return false;
+    }
   }
 }
