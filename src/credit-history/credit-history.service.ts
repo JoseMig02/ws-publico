@@ -5,6 +5,7 @@ import { CreditHistory } from './entities/credit-history.entity';
 import { CreateCreditHistoryDto } from './dto/create-credit-history.dto';
 import { CreditHistoryResponseDto } from './dto/credit-history-response.dto';
 import { Client } from 'src/clients/entities/client.entity';
+import { IsCedulaValidConstraint } from 'src/common/validators/cedula.validator';
 
 @Injectable()
 export class CreditHistoryService {
@@ -44,6 +45,10 @@ export class CreditHistoryService {
   }
 
   async getCreditHistoryByClientNumberId(numberId: string): Promise<CreditHistoryResponseDto[]> {
+    const cedulaValidator = new IsCedulaValidConstraint();
+    if (!cedulaValidator.validate(numberId)) {
+      throw new BadRequestException('La cédula o RNC no tiene un formato válido.');
+    }
     const client = await this.clientRepository.findOne({ where: { numberId } });
     if (!client) {
       throw new NotFoundException(`Cliente con cédula/RNC ${numberId} no encontrado.`);

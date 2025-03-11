@@ -33,6 +33,10 @@ export class LoggingInterceptor implements NestInterceptor {
 
     const serviceName = this.mapServiceName(originalUrl); 
     const ipAddress = ip;  
+    if (serviceName === 'logs' || serviceName === 'logs-stats') {
+      return next.handle(); 
+    }
+
 
     return next.handle().pipe(
       tap(async (response) => {
