@@ -17,7 +17,7 @@ async function bootstrap() {
   );
 
   const apiPath = 'api';
-  // app.setGlobalPrefix(apiPath);
+  app.setGlobalPrefix(apiPath);
 
   const options = new DocumentBuilder()
     .setTitle('WS Public Swagger API')
@@ -26,7 +26,7 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, options);
   // Swagger path: http://localhost:3200/api/docs
-  SwaggerModule.setup(`/docs`, app, document);
+  SwaggerModule.setup(`${apiPath}/docs`, app, document);
   app.enableCors();
 
   await app.listen(Number(process.env.PORT) || 3200);
