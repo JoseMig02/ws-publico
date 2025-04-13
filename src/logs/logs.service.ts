@@ -17,16 +17,35 @@ export class ServiceLog{
     });
     await this.serviceLogRepository.save(log);
   }
-  async getLogs(from?: string, to?: string): Promise<Log[]> {
+  async getLogs(
+    from?: string, 
+    to?: string, 
+    page: number = 1,  
+    limit: number = 10  //
+  ): Promise<any> {
     const queryBuilder = this.serviceLogRepository.createQueryBuilder('log');
     
     if (from && to) {
       queryBuilder.where('log.createdAt BETWEEN :from AND :to', { from, to });
     }
 
-    queryBuilder.orderBy('log.createdAt', 'DESC');
-    
-    return await queryBuilder.getMany();
+
+    const totalRecords = await queryBuilder.getCount(); 
+
+ 
+    const logs = await queryBuilder
+      .orderBy('log.createdAt', 'DESC')
+      .skip((page - 1) * limit)  
+      .take(limit)               
+      .getMany();
+
+    return {
+      totalRecords,  
+      totalPages: Math.ceil(totalRecords / limit),  
+      currentPage: page,  
+      limit,  
+      logs 
+    };
   }
   
   async getStatistics(): Promise<any> {
