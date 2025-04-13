@@ -1,0 +1,13 @@
+# Ignora dependencias locales
+node_modules
+dist
+
+# Ignora configuraciones específicas de git
+.git
+.gitignore
+
+# Ignora archivos del editor o sistema operativo
+*.swp
+*.log
+*.DS_Store
+*.env
