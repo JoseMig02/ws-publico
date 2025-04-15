@@ -18,33 +18,42 @@ export class ServiceLog{
     await this.serviceLogRepository.save(log);
   }
   async getLogs(
-    from?: string, 
-    to?: string, 
-    page: number = 1,  
-    limit: number = 10  //
+    from?: string,
+    to?: string,
+    page: number = 1,
+    limit: number = 10,
+    search?: string
   ): Promise<any> {
     const queryBuilder = this.serviceLogRepository.createQueryBuilder('log');
-    
+  
     if (from && to) {
       queryBuilder.where('log.createdAt BETWEEN :from AND :to', { from, to });
     }
-
-
-    const totalRecords = await queryBuilder.getCount(); 
-
- 
+  
+    if (search) {
+      const whereOrAnd = from && to ? 'andWhere' : 'where';
+      queryBuilder[whereOrAnd](
+        `(
+          CAST(log.id AS VARCHAR) LIKE :search COLLATE Latin1_General_CI_AI OR
+          log.serviceName LIKE :search COLLATE Latin1_General_CI_AI OR
+          log.ipAddress LIKE :search COLLATE Latin1_General_CI_AI
+        )`,
+        { search: `%${search}%` }
+      );
+    }
+    
+  
+    const total = await queryBuilder.getCount();
+  
     const logs = await queryBuilder
       .orderBy('log.createdAt', 'DESC')
-      .skip((page - 1) * limit)  
-      .take(limit)               
+      .skip((page - 1) * limit)
+      .take(limit)
       .getMany();
-
+  
     return {
-      totalRecords,  
-      totalPages: Math.ceil(totalRecords / limit),  
-      currentPage: page,  
-      limit,  
-      logs 
+      total,
+      logs
     };
   }
   
